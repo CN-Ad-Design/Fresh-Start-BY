@@ -1,0 +1,2061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fresh Start</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --color-ink: #1d1d1f;
+      --color-graphite: #707070;
+      --color-slate: #474747;
+      --color-ash: #333333;
+      --color-fog: #f5f5f7;
+      --color-snow: #ffffff;
+      --color-obsidian: #000000;
+      --color-silver-mist: #e8e8ed;
+      --color-azure: #0071e3;
+      --color-cobalt-link: #0066cc;
+      --font-sf-pro-display: 'SF Pro Display', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-sf-pro-text: 'SF Pro Text', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --radius-cards: 28px;
+      --radius-buttons: 999px;
+      --radius-smallbuttons: 10px;
+      --transition: 180ms ease;
+      --surface-canvas: #f5f5f7;
+      --surface-card: #ffffff;
+      --surface-recessed: #f5f5f7;
+      --surface-frosted-control: rgba(210, 210, 215, 0.64);
+      --border-default: #e8e8ed;
+    }
+
+    body {
+      font-family: var(--font-sf-pro-text);
+      background: var(--surface-canvas);
+      color: var(--color-ink);
+      padding: 16px;
+      min-width: 320px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    body.user-mode-active {
+      background: linear-gradient(-45deg, rgba(24, 160, 251, 0.1), rgba(0, 114, 255, 0.1), rgba(88, 196, 255, 0.1), rgba(24, 160, 251, 0.1)), var(--surface-canvas);
+      background-size: 400% 400%, 100% 100%;
+      animation: gradientFlow 8s ease infinite;
+    }
+
+    body::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    html::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    *::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    .dev-trigger {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 10px;
+      height: 10px;
+      cursor: default;
+      z-index: 9999;
+    }
+
+    /* Header */
+    .header {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-cards);
+      background: var(--surface-card);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .brand-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-ink);
+      letter-spacing: -0.04px;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      line-height: 1.33;
+      color: var(--color-graphite);
+    }
+
+    .header-center {
+      display: flex;
+      justify-content: center;
+    }
+
+    .header-right {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .mode-switch {
+      display: flex;
+      border-radius: var(--radius-buttons);
+      padding: 2px;
+      background: var(--surface-frosted-control);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(29, 29, 31, 0.10);
+    }
+
+    .mode-seg {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: rgba(0, 0, 0, 0.56);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: var(--radius-buttons);
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+      white-space: nowrap;
+    }
+
+    .mode-seg:hover {
+      background: rgba(255, 255, 255, 0.65);
+      color: var(--color-ink);
+    }
+
+    .mode-seg.active {
+      background: rgba(255, 255, 255, 0.80);
+      color: var(--color-ink);
+    }
+
+    .lang-toggle {
+      padding: 6px 10px;
+      background: var(--surface-frosted-control);
+      border: 1px solid rgba(29, 29, 31, 0.10);
+      border-radius: var(--radius-buttons);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-ink);
+      transition: background var(--transition), border-color var(--transition);
+      backdrop-filter: blur(20px);
+    }
+
+    .lang-toggle:hover {
+      background: rgba(210, 210, 215, 0.85);
+      border-color: rgba(29, 29, 31, 0.16);
+    }
+
+    .lang-toggle:focus-visible,
+    .mode-seg:focus-visible,
+    .tab-pill:focus-visible,
+    .btn-run-main:focus-visible,
+    .btn-run-item:focus-visible,
+    .user-run-btn:focus-visible {
+      outline: 2px solid rgba(29, 29, 31, 0.22);
+      outline-offset: 2px;
+    }
+
+    .mode-view {
+      display: none;
+    }
+
+    .mode-view.active {
+      display: block;
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-cards);
+      padding: 20px;
+      transition: background var(--transition), border-color var(--transition);
+    }
+
+    .card:hover {
+      background: rgba(255, 255, 255, 0.92);
+      border-color: rgba(29, 29, 31, 0.12);
+    }
+
+    .lead {
+      padding: 22px 20px;
+      background: var(--surface-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-cards);
+    }
+
+    .lead-title {
+      font-family: var(--font-sf-pro-display);
+      font-size: 24px;
+      line-height: 1.18;
+      font-weight: 700;
+      letter-spacing: -0.36px;
+      color: var(--color-ink);
+      margin-bottom: 8px;
+    }
+
+    .lead-desc {
+      font-size: 14px;
+      line-height: 1.43;
+      color: var(--color-graphite);
+    }
+
+    .section-head {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 0 2px;
+    }
+
+    .section-title {
+      font-family: var(--font-sf-pro-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-ink);
+      letter-spacing: -0.04px;
+    }
+
+    .section-desc {
+      font-size: 12px;
+      line-height: 1.43;
+      color: var(--color-graphite);
+    }
+
+    .combo-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .card[data-surface="combo"] {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card[data-surface="combo"] .combo-desc {
+      flex: 1;
+    }
+
+    .card[data-surface="combo"] .user-run-btn {
+      margin-top: auto;
+    }
+
+    @media (max-width: 360px) {
+      .combo-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .combo-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 8px;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-buttons);
+      font-size: 12px;
+      line-height: 1.33;
+      color: var(--color-ink);
+      background: var(--surface-recessed);
+      width: fit-content;
+      margin-bottom: 12px;
+    }
+
+    .combo-title {
+      font-family: var(--font-sf-pro-display);
+      font-size: 17px;
+      line-height: 1.24;
+      font-weight: 600;
+      letter-spacing: -0.1px;
+      margin-bottom: 6px;
+      color: var(--color-ink);
+    }
+
+    .combo-desc {
+      font-size: 14px;
+      line-height: 1.43;
+      color: var(--color-graphite);
+      margin-bottom: 14px;
+    }
+
+    .user-run-btn {
+      width: auto;
+      padding: 8px 10px;
+      border-radius: var(--radius-smallbuttons);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition), border-color var(--transition), transform var(--transition);
+    }
+
+    .user-run-btn.btn-link {
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--color-cobalt-link);
+      border-radius: 0;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .user-run-btn.btn-link:hover {
+      text-decoration: underline;
+    }
+
+    .user-run-btn:active {
+      transform: translateY(0.5px);
+    }
+
+    .btn-primary {
+      background: var(--color-obsidian);
+      color: var(--color-snow);
+      border: 1px solid var(--color-obsidian);
+      border-radius: var(--radius-buttons);
+      padding: 8px 14px;
+    }
+
+    .btn-primary:hover {
+      background: rgba(0, 0, 0, 0.92);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-ink);
+      border: 1px solid var(--border-default);
+    }
+
+    .btn-ghost:hover {
+      background: var(--surface-recessed);
+      border-color: rgba(29, 29, 31, 0.12);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .feature-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .feature-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .feature-title {
+      font-family: var(--font-sf-pro-display);
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.24;
+      letter-spacing: -0.1px;
+      margin-bottom: 6px;
+      color: var(--color-ink);
+    }
+
+    .feature-desc {
+      font-size: 14px;
+      color: var(--color-graphite);
+      line-height: 1.43;
+    }
+
+    .feature-action {
+      flex-shrink: 0;
+    }
+
+    /* Tab Navigation - Pills */
+    .tab-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tab-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 12px;
+      background: transparent;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-cards);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-graphite);
+      transition: background var(--transition), color var(--transition), border-color var(--transition);
+    }
+
+    .tab-pill:hover {
+      background: rgba(255, 255, 255, 0.92);
+      border-color: rgba(29, 29, 31, 0.12);
+      color: var(--color-ink);
+    }
+
+    .tab-pill.active {
+      background: var(--surface-card);
+      color: var(--color-ink);
+      border-color: rgba(29, 29, 31, 0.12);
+    }
+
+    .tab-pill svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    /* Main Card */
+    .main-card {
+      background: var(--surface-card);
+      border-radius: var(--radius-cards);
+      padding: 16px;
+      border: 1px solid var(--border-default);
+    }
+
+    /* Feature Header */
+    .feature-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .feature-header .icon {
+      width: 20px;
+      height: 20px;
+      color: var(--color-ink);
+    }
+
+    .feature-header h2 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-ink);
+    }
+
+    /* Feature Description */
+    .main-card .feature-desc {
+      font-size: 12px;
+      color: var(--color-graphite);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    /* Main Run Button */
+    .btn-run-main {
+      width: 100%;
+      padding: 12px;
+      background: var(--color-obsidian);
+      color: var(--color-snow);
+      border: 1px solid var(--color-obsidian);
+      border-radius: var(--radius-buttons);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition);
+      margin-bottom: 16px;
+    }
+
+    .btn-run-main:hover {
+      background: rgba(0, 0, 0, 0.92);
+    }
+
+    .btn-run-main:active {
+      transform: translateY(0.5px);
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--border-default);
+      margin-bottom: 16px;
+    }
+
+    /* Sub Functions List */
+    .sub-functions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sub-function-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      background: var(--surface-recessed);
+      border-radius: var(--radius-cards);
+      border: 1px solid var(--border-default);
+    }
+
+    .sub-function-info {
+      flex: 1;
+    }
+
+    .sub-function-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-ink);
+      margin-bottom: 2px;
+    }
+
+    .sub-function-desc {
+      font-size: 11px;
+      color: var(--color-graphite);
+    }
+
+    .sub-function-desc ul {
+      margin: 6px 0 0;
+      padding-left: 16px;
+    }
+
+    .sub-function-desc li {
+      margin: 2px 0;
+    }
+
+    .sub-function-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Toggle Switch */
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      background: rgba(29, 29, 31, 0.10);
+      border-radius: 11px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      border: 1px solid rgba(29, 29, 31, 0.10);
+    }
+
+    .toggle.active {
+      background: rgba(29, 29, 31, 0.16);
+      border-color: rgba(29, 29, 31, 0.16);
+    }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      background: var(--surface-card);
+      border-radius: 50%;
+      transition: transform 0.2s ease;
+    }
+
+    .toggle.active::after {
+      transform: translateX(18px);
+    }
+
+    /* Run Button (Circular) */
+    .btn-run-item {
+      width: 28px;
+      height: 28px;
+      background: transparent;
+      border: 1px solid var(--border-default);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition), border-color var(--transition);
+      flex-shrink: 0;
+    }
+
+    .btn-run-item:hover {
+      background: rgba(255, 255, 255, 0.92);
+      border-color: rgba(29, 29, 31, 0.12);
+    }
+
+    .btn-run-item svg {
+      width: 12px;
+      height: 12px;
+      color: var(--color-ink);
+    }
+
+    /* Tab Content */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .u-shell {
+      position: relative;
+      border-radius: 20px;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    .u-bg {
+      display: none;
+    }
+
+    .u-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding: 16px;
+    }
+
+    .u-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .u-title {
+      color: #161823;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: 0;
+      white-space: pre-line;
+    }
+
+    .u-subtitle {
+      margin-top: 8px;
+      color: #16182399;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .u-top-right {
+      display: inline-flex;
+      align-items: flex-start;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .u-link {
+      appearance: none;
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      color: #16182399;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 15px;
+      line-height: 21px;
+      letter-spacing: 0;
+    }
+
+    .u-step-card {
+      display: flex;
+      flex-direction: column;
+      align-self: stretch;
+      border: 1px solid #ffffff;
+      border-radius: 24px;
+      padding: 23px;
+      gap: 16px;
+      background-image: linear-gradient(180deg, #ffffffcc 0%, #ffffff33 100%);
+      backdrop-filter: blur(20px);
+    }
+
+    .u-step-hero {
+      display: flex;
+      align-items: center;
+      align-self: stretch;
+      border-radius: 12px;
+      height: 113px;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(-45deg, #18A0FB, #8B5CF6, #4FACFE, #A855F7);
+      background-size: 400% 400%;
+      animation: gradientFlow 8s ease infinite;
+    }
+
+    .u-step-hero-waves {
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      right: -50%;
+      bottom: -50%;
+      background:
+        radial-gradient(circle at 50% 50%, transparent 0px, transparent 20px, rgba(255,255,255,0.08) 20px, rgba(255,255,255,0.08) 22px, transparent 22px),
+        radial-gradient(circle at 50% 50%, transparent 0px, transparent 40px, rgba(255,255,255,0.07) 40px, rgba(255,255,255,0.07) 42px, transparent 42px),
+        radial-gradient(circle at 50% 50%, transparent 0px, transparent 60px, rgba(255,255,255,0.07) 60px, rgba(255,255,255,0.07) 61.5px, transparent 61.5px),
+        radial-gradient(circle at 50% 50%, transparent 0px, transparent 80px, rgba(255,255,255,0.06) 80px, rgba(255,255,255,0.06) 81px, transparent 81px),
+        radial-gradient(circle at 50% 50%, transparent 0px, transparent 100px, rgba(255,255,255,0.06) 100px, rgba(255,255,255,0.06) 101px, transparent 101px),
+        radial-gradient(circle at 50% 50%, transparent 0px, transparent 120px, rgba(255,255,255,0.05) 120px, rgba(255,255,255,0.05) 120.8px, transparent 120.8px),
+        radial-gradient(circle at 50% 50%, transparent 0px, transparent 140px, rgba(255,255,255,0.05) 140px, rgba(255,255,255,0.05) 140.5px, transparent 140.5px),
+        radial-gradient(circle at 50% 50%, transparent 0px, transparent 160px, rgba(255,255,255,0.04) 160px, rgba(255,255,255,0.04) 160.3px, transparent 160.3px);
+      pointer-events: none;
+      transition: background-position 0.1s ease-out;
+    }
+
+    .u-step-card[data-state="empty"] .u-step-hero {
+      background: linear-gradient(-45deg, #18A0FB, #C084FC, #5BC0FF, #E9D5FF);
+      background-size: 400% 400%;
+      animation: gradientFlow 8s ease infinite;
+    }
+
+    .u-step-card[data-state="step1"] .u-step-hero {
+      background: linear-gradient(-45deg, #0072FF, #8B5CF6, #18A0FB, #A855F7);
+      background-size: 400% 400%;
+      animation: gradientFlow 8s ease infinite;
+    }
+
+    .u-step-card[data-state="step2"] .u-step-hero {
+      background: linear-gradient(-45deg, #00C6FF, #7C3AED, #18A0FB, #9333EA);
+      background-size: 400% 400%;
+      animation: gradientFlow 8s ease infinite;
+    }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .u-step-hero-img {
+      display: none;
+    }
+
+    .u-step-hero-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      font-weight: 800;
+      text-align: center;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(-45deg, #ffffff, #e0e7ff, #c7d2fe, #ffffff);
+      background-size: 400% 400%;
+      animation: textGradientFlow 8s ease infinite;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .u-step-card[data-state="empty"] .u-step-hero-text {
+      opacity: 1;
+    }
+
+    .u-step-card[data-state="step1"] .u-step-hero-text {
+      opacity: 1;
+    }
+
+    .u-step-card[data-state="step2"] .u-step-hero-text {
+      opacity: 1;
+    }
+
+    @keyframes textGradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .u-step-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      align-self: stretch;
+      gap: 4px;
+      text-align: center;
+    }
+
+    .u-step-title {
+      color: #161823;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 24px;
+      letter-spacing: 0;
+    }
+
+    .u-step-desc {
+      color: #16182399;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 13px;
+      letter-spacing: 0;
+      white-space: pre-line;
+    }
+
+    .u-step-run {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      align-self: stretch;
+      border: none;
+      border-radius: 8px;
+      background: #18a0fb;
+      height: 36px;
+      cursor: pointer;
+      color: #ffffff;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+
+    .u-step-run[disabled] {
+      background: #18a0fb57;
+      cursor: not-allowed;
+    }
+
+    .u-dots {
+      display: flex;
+      align-items: center;
+      align-self: stretch;
+      justify-content: center;
+      gap: 4px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+
+    .u-dot {
+      appearance: none;
+      border: none;
+      background: #00000033;
+      width: 4px;
+      height: 4px;
+      border-radius: 100px;
+      padding: 0;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .u-dot::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .u-dot[aria-current="true"] {
+      background: #000000;
+      width: 8px;
+      height: 4px;
+    }
+
+    .u-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .u-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #ffffff;
+      border-radius: 24px;
+      padding: 19px;
+      gap: 16px;
+      background-image: linear-gradient(180deg, #ffffffcc 0%, #ffffff33 100%);
+      backdrop-filter: blur(20px);
+    }
+
+    .u-emoji {
+      flex-shrink: 0;
+      line-height: 17px;
+      letter-spacing: 0;
+      color: #161823;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 17px;
+    }
+
+    .u-card-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      align-self: stretch;
+      gap: 4px;
+    }
+
+    .u-card-title {
+      flex-shrink: 0;
+      line-height: 21px;
+      letter-spacing: 0;
+      color: #161823;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .u-card-desc {
+      flex-shrink: 0;
+      align-self: stretch;
+      text-align: center;
+      letter-spacing: 0;
+      color: #16182399;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 13px;
+      white-space: pre-line;
+    }
+
+    .u-card-btn {
+      display: flex;
+      align-items: center;
+      align-self: stretch;
+      justify-content: center;
+      border: none;
+      border-radius: 8px;
+      background: #1618230d;
+      padding-right: 12px;
+      padding-left: 12px;
+      height: 36px;
+      cursor: pointer;
+      color: #161823;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="dev-trigger" id="dev-trigger"></div>
+    <div class="header" id="dev-header" role="banner">
+      <div class="header-left">
+        <div class="brand">
+          <div class="brand-title" data-i18n="app.title">Fresh Start</div>
+          <div class="brand-subtitle" data-i18n="app.tagline">Clean & optimize quickly</div>
+        </div>
+      </div>
+      <div class="header-center">
+        <div class="mode-switch" role="tablist" aria-label="UI mode">
+          <button class="mode-seg" id="mode-user" type="button" data-mode="user" role="tab" aria-selected="false" data-i18n="mode.user">User</button>
+          <button class="mode-seg" id="mode-dev" type="button" data-mode="dev" role="tab" aria-selected="false" data-i18n="mode.dev">Dev</button>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="lang-toggle" id="lang-toggle-dev" data-lang-toggle type="button">中文</button>
+      </div>
+    </div>
+
+    <div class="mode-view" id="user-mode" role="region" aria-label="User mode">
+      <div class="u-shell">
+        <div class="u-bg" id="u-bg"></div>
+        <div class="u-content">
+          <div class="u-top">
+            <div class="u-top-left">
+              <div class="u-title" data-i18n="user.top.title">Your Design\nStart From Here</div>
+              <div class="u-subtitle" data-i18n="user.top.subtitle">Clean, Optimize, Get Ready</div>
+            </div>
+            <div class="u-top-right">
+              <button class="u-link" id="lang-toggle" data-lang-toggle type="button">中文</button>
+            </div>
+          </div>
+
+          <div class="u-step-card" id="u-step-card">
+            <div class="u-step-hero">
+              <div class="u-step-hero-waves" id="u-step-hero-waves"></div>
+              <div class="u-step-hero-img" id="u-step-hero-img"></div>
+              <div class="u-step-hero-text" id="u-step-hero-text">Select</div>
+            </div>
+            <div class="u-step-text">
+              <div class="u-step-title" id="u-step-title">Please select a frame to start</div>
+              <div class="u-step-desc" id="u-step-desc">You can follow the steps or use the functions\nbelow\u00a0\u00a0individually</div>
+            </div>
+            <button class="u-step-run" id="u-step-run" type="button" data-i18n="common.run">Run</button>
+            <div class="u-dots" id="u-dots" aria-label="Steps">
+              <button class="u-dot" type="button" data-step="0" aria-label="Step 1"></button>
+              <button class="u-dot" type="button" data-step="1" aria-label="Step 2"></button>
+            </div>
+          </div>
+
+          <div class="u-grid">
+            <div class="u-card">
+              <div class="u-emoji">🗑️</div>
+              <div class="u-card-text">
+                <div class="u-card-title" data-i18n="module.removeInvisible.title">Remove Invisible</div>
+                <div class="u-card-desc" data-i18n="user.feature.removeInvisible.desc">Detect and remove\ninvisible elements</div>
+              </div>
+              <button class="u-card-btn" type="button" onclick="runModule('remove-invisible')" data-i18n="user.feature.removeInvisible.action">Remove</button>
+            </div>
+
+            <div class="u-card">
+              <div class="u-emoji">🏷️</div>
+              <div class="u-card-text">
+                <div class="u-card-title" data-i18n="module.smartRename.title">Smart Rename</div>
+                <div class="u-card-desc" data-i18n="user.feature.smartRename.desc">Automatically\nrename all layers</div>
+              </div>
+              <button class="u-card-btn" type="button" onclick="runModule('smart-rename')" data-i18n="user.feature.smartRename.action">Rename</button>
+            </div>
+
+            <div class="u-card">
+              <div class="u-emoji">📂</div>
+              <div class="u-card-text">
+                <div class="u-card-title" data-i18n="module.optimizeStructure.title">Optimize Structure</div>
+                <div class="u-card-desc" data-i18n="user.feature.optimizeStructure.desc">Optimize and flatten\nlayer structure</div>
+              </div>
+              <button class="u-card-btn" type="button" onclick="runModule('flatten-structure')" data-i18n="user.feature.optimizeStructure.action">Optimize</button>
+            </div>
+
+            <div class="u-card">
+              <div class="u-emoji">🧩</div>
+              <div class="u-card-text">
+                <div class="u-card-title" data-i18n="module.autoLayout.title">Auto Layout</div>
+                <div class="u-card-desc" data-i18n="user.feature.autoLayout.desc">Add auto layout\nto all layers</div>
+              </div>
+              <button class="u-card-btn" type="button" onclick="runModule('group-elements', { addStroke: false })" data-i18n="user.feature.autoLayout.action">Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mode-view" id="dev-mode" role="region" aria-label="Dev mode">
+      <!-- Tab Navigation -->
+      <div class="tab-nav">
+        <button class="tab-pill active" data-tab="remove-invisible" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14"/>
+          </svg>
+          <span data-i18n="tab.removeInvisible">Remove Invisible</span>
+        </button>
+        <button class="tab-pill" data-tab="smart-rename" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M7 7h10M7 12h10M7 17h10M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/>
+          </svg>
+          <span data-i18n="tab.smartRename">Smart Rename</span>
+        </button>
+        <button class="tab-pill" data-tab="flatten-structure" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+          </svg>
+          <span data-i18n="tab.optimizeStructure">Optimize Structure</span>
+        </button>
+        <button class="tab-pill" data-tab="group-elements" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+          </svg>
+          <span data-i18n="tab.autoLayout">Auto Layout</span>
+        </button>
+      </div>
+
+  <!-- Tab Content: Remove Invisible -->
+  <div class="tab-content active" id="remove-invisible">
+    <div class="main-card">
+      <div class="feature-header">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14"/>
+        </svg>
+        <h2 data-i18n="module.removeInvisible.title">Remove Invisible</h2>
+      </div>
+      <p class="feature-desc" data-i18n="module.removeInvisible.desc">Detect and remove hidden layers, zero-opacity elements, and invisible masks to clean up your document.</p>
+      <button class="btn-run-main" onclick="runModule('remove-invisible')" data-i18n="common.run">Run</button>
+      <div class="divider"></div>
+      <div class="sub-functions">
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.removeHidden.title">01 Remove Invisible</div>
+            <div class="sub-function-desc" data-i18n-html="sub.removeHidden.desc">删除 visible=false 或 opacity=0 的图层（递归）</div>
+          </div>
+          <div class="sub-function-controls">
+            <button class="btn-run-item" onclick="runSubFunction('remove-hidden')">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.removeOutsideContainer.title">02 Remove Outside-Container</div>
+            <div class="sub-function-desc" data-i18n-html="sub.removeOutsideContainer.desc">If an element is completely outside the container bounds, delete it.</div>
+          </div>
+          <div class="sub-function-controls">
+            <button class="btn-run-item" onclick="runSubFunction('remove-outside-container')">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.removeOverlapImages.title">03 Remove Overlapped Images</div>
+            <div class="sub-function-desc" data-i18n-html="sub.removeOverlapImages.desc">若容器内多张图片相互重叠且最上层图片覆盖容器，则删除其余图片</div>
+          </div>
+          <div class="sub-function-controls">
+            <button class="btn-run-item" onclick="runSubFunction('remove-overlap-images')">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content: Smart Rename -->
+  <div class="tab-content" id="smart-rename">
+    <div class="main-card">
+      <div class="feature-header">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M7 7h10M7 12h10M7 17h10M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/>
+        </svg>
+        <h2 data-i18n="module.smartRename.title">Smart Rename</h2>
+      </div>
+      <p class="feature-desc" data-i18n="module.smartRename.desc">Automatically rename layers with meaningful names based on content, type, and context.</p>
+      <button class="btn-run-main" onclick="runModule('smart-rename')" data-i18n="common.run">Run</button>
+      <div class="divider"></div>
+      <div class="sub-functions">
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.smartRename.title">01 Smart Rename</div>
+            <div class="sub-function-desc" data-i18n-html="sub.smartRename.desc">按类型/内容自动命名（跳过 Instance）</div>
+          </div>
+          <div class="sub-function-controls">
+            <button class="btn-run-item" onclick="runSubFunction('smart-rename')">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content: Optimize Structure -->
+  <div class="tab-content" id="flatten-structure">
+    <div class="main-card">
+      <div class="feature-header">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+        </svg>
+        <h2 data-i18n="module.optimizeStructure.title">Optimize Structure</h2>
+      </div>
+      <p class="feature-desc" data-i18n="module.optimizeStructure.desc">优化层级：去除冗余嵌套，统一 Group 为 Frame，尽量保持布局不变。</p>
+      <button class="btn-run-main" onclick="runModule('flatten-structure')" data-i18n="common.run">Run</button>
+      <div class="divider"></div>
+      <div class="sub-functions">
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.flattenRemoveAutoLayout.title">01 Remove Auto Layout</div>
+            <div class="sub-function-desc" data-i18n-html="sub.flattenRemoveAutoLayout.desc">移除所有 Auto Layout，保留原尺寸与位置</div>
+          </div>
+          <div class="sub-function-controls">
+            <button class="btn-run-item" onclick="runSubFunction('flatten-ra')">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.flattenConvertGroups.title">02 Convert Groups</div>
+            <div class="sub-function-desc" data-i18n-html="sub.flattenConvertGroups.desc">将 Group 替换为同尺寸 Frame（保位置/圆角）</div>
+          </div>
+          <div class="sub-function-controls">
+            <button class="btn-run-item" onclick="runSubFunction('flatten-cg')">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.flattenApplyShapeStyle.title">03 Apply Shape Style</div>
+            <div class="sub-function-desc" data-i18n-html="sub.flattenApplyShapeStyle.desc">占满容器的形状样式上移到 Frame，并删除该形状</div>
+          </div>
+          <div class="sub-function-controls">
+            <button class="btn-run-item" onclick="runSubFunction('flatten-as')">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.flattenDetectMajorColor.title">04 Detect Major Color</div>
+            <div class="sub-function-desc">
+              <span data-i18n="sub.flattenDetectMajorColor.label">统计所选容器主色（按面积）：</span><span id="flatten-major-color-text">—</span>
+              <span id="flatten-major-color-swatch" style="display:inline-block;width:10px;height:10px;border-radius:2px;margin-left:6px;vertical-align:middle;border:1px solid rgba(255,255,255,0.2);"></span>
+            </div>
+          </div>
+          <div class="sub-function-controls">
+            <button class="btn-run-item" onclick="runSubFunction('flatten-mc')">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.flattenOptimizeStructure.title">05 Optimize Structure</div>
+            <div class="sub-function-desc" data-i18n-html="sub.flattenOptimizeStructure.desc">展开层级并保位置；主色背景仅保留面积最大的一个</div>
+          </div>
+          <div class="sub-function-controls">
+            <button class="btn-run-item" onclick="runSubFunction('flatten-ft')">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content: Auto Layout -->
+  <div class="tab-content" id="group-elements">
+    <div class="main-card">
+      <div class="feature-header">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+        </svg>
+        <h2 data-i18n="module.autoLayout.title">Auto Layout</h2>
+      </div>
+      <p class="feature-desc" data-i18n="module.autoLayout.desc">自动布局：识别行/列结构，转为 Auto Layout，并清理辅助层。</p>
+      <button class="btn-run-main" onclick="runModule('group-elements')" data-i18n="common.run">Run</button>
+      <div class="divider"></div>
+      <div class="sub-functions">
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.geCreateRelations.title">01 Create Relation Frames</div>
+            <div class="sub-function-desc" data-i18n-html="sub.geCreateRelations.desc">识别行/列关系并生成 Relation Frame</div>
+          </div>
+          <div class="sub-function-controls">
+            <button class="btn-run-item" onclick="runSubFunction('ge-rel')">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.geNearestWrap.title">02 Nearest Wrap</div>
+            <div class="sub-function-desc" data-i18n-html="sub.geNearestWrap.desc">将最近的元素补进对应 Relation Frame</div>
+          </div>
+          <div class="sub-function-controls">
+            <button class="btn-run-item" onclick="runSubFunction('ge-wrap')">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.geAutoLayoutAll.title">03 Auto Layout + Cleanup</div>
+            <div class="sub-function-desc" data-i18n-html="sub.geAutoLayoutAll.desc">将 Relation/Wrap 转 Auto Layout，并在子树应用与清理</div>
+          </div>
+          <div class="sub-function-controls">
+            <button class="btn-run-item" onclick="runSubFunction('group-elements-al')">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.geConvertToAutoLayout.title">04 Convert To Auto Layout</div>
+            <div class="sub-function-desc" data-i18n-html="sub.geConvertToAutoLayout.desc">将 Relation/Wrap Frame 转为 Auto Layout（Row/Column）</div>
+          </div>
+          <div class="sub-function-controls">
+            <button class="btn-run-item" onclick="runSubFunction('ge-al-convert')">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.geConvertGroups.title">05 Convert Groups</div>
+            <div class="sub-function-desc" data-i18n-html="sub.geConvertGroups.desc">将 Group 转 Frame，并尽量保留圆角</div>
+          </div>
+          <div class="sub-function-controls">
+            <button class="btn-run-item" onclick="runSubFunction('ge-al-cg')">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.geApplyCleanup.title">06 Apply & Cleanup</div>
+            <div class="sub-function-desc" data-i18n-html="sub.geApplyCleanup.desc">应用 Auto Layout 后，自动解散无用中间 Frame（保位置）</div>
+          </div>
+          <div class="sub-function-controls">
+            <button class="btn-run-item" onclick="runSubFunction('ge-al-apply-clean')">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.geConvertContainer.title">07 Convert Containers</div>
+            <div class="sub-function-desc" data-i18n-html="sub.geConvertContainer.desc">若容器有填充/描边，则将该容器也转为 Auto Layout（移动最小）</div>
+          </div>
+          <div class="sub-function-controls">
+            <button class="btn-run-item" onclick="runSubFunction('ge-al-container')">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sub-function-item">
+          <div class="sub-function-info">
+            <div class="sub-function-title" data-i18n="sub.geAddStroke.title">08 Add Stroke</div>
+            <div class="sub-function-desc" data-i18n-html="sub.geAddStroke.desc">给新生成的 Frame 加描边，便于检查（可关闭）</div>
+          </div>
+          <div class="sub-function-controls">
+            <div class="toggle active" data-setting="group-add-stroke" onclick="toggleSetting(this)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    </div>
+  </div>
+
+  <script>
+    const I18N = {
+      en: {
+        'app.title': 'Fresh Start',
+        'app.tagline': 'Clean layers. Keep structure.',
+        'mode.user': 'User',
+        'mode.dev': 'Dev',
+        'user.top.title': 'Your Design\nRestart From Here',
+        'user.top.subtitle': 'Clean, Optimize, Get Ready',
+        'user.step.none.title': 'Please select a frame to start',
+        'user.step.none.desc': 'You can follow the steps or use the functions\nbelow\u00a0\u00a0individually',
+        'user.step.1.title': 'Step 1: Clear for your design',
+        'user.step.1.desc': 'Remove Invisible + Smart Rename\nSuitable for whole page',
+        'user.step.2.title': 'Step 2: Ready for your design',
+        'user.step.2.desc': 'Optimize Structure + Auto Layout\nWork better with single section',
+        'user.feature.removeInvisible.desc': 'Hidden, overlapped\n0 opacity elements',
+        'user.feature.removeInvisible.action': 'Remove',
+        'user.feature.smartRename.desc': 'Rename all layers\nby element type',
+        'user.feature.smartRename.action': 'Rename',
+        'user.feature.optimizeStructure.desc': 'Reduce hierarchy\nfor auto layout',
+        'user.feature.optimizeStructure.action': 'Optimize',
+        'user.feature.autoLayout.desc': 'Add reasonable\nauto layout',
+        'user.feature.autoLayout.action': 'Add',
+        'user.hero.title': 'Fresh Start',
+        'user.hero.desc': 'A calmer, safer way to clean and organize layers.',
+        'user.lead.title': 'Fresh Start',
+        'user.lead.desc': 'A calmer, safer way to clean and organize layers.',
+        'user.section.integrated.title': 'Integrated Features',
+        'user.section.integrated.desc': 'Higher-level flows combining two core modules.',
+        'user.section.core.title': 'Core Modules',
+        'user.section.core.desc': 'Run one module at a time when you only need a single action.',
+        'user.combo1.badge': 'New 01',
+        'user.combo1.title': 'Clean + Rename',
+        'user.combo1.desc': 'Removes invisible layers and overlapped images, then applies smart renaming for readability.',
+        'user.combo2.badge': 'New 02',
+        'user.combo2.title': 'Structure + Auto Layout',
+        'user.combo2.desc': 'Optimizes hierarchy first, then builds Auto Layout and cleans helpers.',
+        'common.run': 'Run',
+        'tab.removeInvisible': 'Remove Invisible',
+        'tab.smartRename': 'Smart Rename',
+        'tab.optimizeStructure': 'Optimize Structure',
+        'tab.autoLayout': 'Auto Layout',
+        'module.removeInvisible.title': 'Remove Invisible',
+        'module.removeInvisible.desc': 'Detect and remove hidden layers, zero-opacity elements, and layers outside container bounds to clean up your document.',
+        'module.smartRename.title': 'Smart Rename',
+        'module.smartRename.desc': 'Automatically rename layers with meaningful names based on content, type, and context.',
+        'module.optimizeStructure.title': 'Optimize Structure',
+        'module.optimizeStructure.desc': 'Optimize hierarchy: remove redundant nesting, convert Groups to Frames, and keep layout stable.',
+        'module.autoLayout.title': 'Auto Layout',
+        'module.autoLayout.desc': 'Build Auto Layout: detect row/column structure, convert to Auto Layout, and cleanup helpers.',
+        'sub.removeHidden.title': '01 Remove Invisible',
+        'sub.removeHidden.desc': '<ul><li>Delete layers where <code>visible=false</code></li><li>Delete layers where <code>opacity=0</code></li><li>Recursive in selected Frame/Group subtree</li></ul>',
+        'sub.removeOutsideContainer.title': '02 Remove Outside-Container',
+        'sub.removeOutsideContainer.desc': '<ul><li>Delete a child layer if its bounds do not intersect the container</li><li>Skip locked layers</li><li>Skip Instances / layers inside Instances</li></ul>',
+        'sub.removeOverlapImages.title': '03 Remove Overlapped Images',
+        'sub.removeOverlapImages.desc': '<ul><li>Find layers with visible <code>IMAGE</code> fills</li><li>If 2+ images overlap and the top image covers the container, keep the top one</li><li>Delete other images that overlap the top image</li><li>Skip locked layers and Instances</li></ul>',
+        'sub.smartRename.title': '01 Smart Rename',
+        'sub.smartRename.desc': '<ul><li>Rename layers by type/content</li><li>Frames: use <code>Row/Column</code> if Auto Layout, otherwise infer from children</li><li>Skip Instances (no rename inside Instances)</li><li>Recursive in Frame/Group subtree</li></ul>',
+        'sub.flattenRemoveAutoLayout.title': '01 Remove Auto Layout',
+        'sub.flattenRemoveAutoLayout.desc': '<ul><li>For Frames with Auto Layout: set <code>layoutMode=NONE</code></li><li>Keep original size by resizing back after removing Auto Layout</li><li>Recursive in Frame/Group subtree</li></ul>',
+        'sub.flattenConvertGroups.title': '02 Convert Groups',
+        'sub.flattenConvertGroups.desc': '<ul><li>Convert <code>GROUP</code> to same-size <code>FRAME</code></li><li>Keep absolute position of children</li><li>Preserve corner radius when possible</li><li>Skip Groups inside Instances</li></ul>',
+        'sub.flattenApplyShapeStyle.title': '03 Apply Shape Style',
+        'sub.flattenApplyShapeStyle.desc': '<ul><li>Find a non-image Shape that covers &gt; 90% of container area</li><li>If the shape also covers &gt; 90% of the selected container: apply to the selected container Frame</li><li>If it is a mask: delete the mask</li><li>Otherwise: move fills/strokes/effects/corners to the target Frame</li><li>Delete the shape after applying style</li></ul>',
+        'sub.flattenDetectMajorColor.title': '04 Detect Major Color',
+        'sub.flattenDetectMajorColor.label': 'Major color (by area): ',
+        'sub.flattenOptimizeStructure.title': '05 Optimize Structure',
+        'sub.flattenOptimizeStructure.desc': '<ul><li>Flatten hierarchy and keep absolute positions</li><li>Do not flatten Instances, Frames that contain images AND whose size is &lt;= the image layer size, or Frames with fills</li><li>Detect major color (area-weighted), then keep only the largest background using that color</li></ul>',
+        'sub.geCreateRelations.title': '01 Create Relation Frames',
+        'sub.geCreateRelations.desc': '<ul><li>Detect row/column relations by axis overlap (connectivity grouping)</li><li>Create Relation Frames for each group (Row/Column)</li><li>Skip locked or invalid (0-size) layers</li><li>Avoid nesting duplicate Relation Frames</li></ul>',
+        'sub.geNearestWrap.title': '02 Nearest Wrap',
+        'sub.geNearestWrap.desc': '<ul><li>Only runs on Relation Frames (Row/Column)</li><li>Compute nearest spacing pairs (tolerance 0.01) and group by connectivity</li><li>Create Wrap Frames for nearest groups</li><li>Skip Relation Frames inside Instances</li></ul>',
+        'sub.geAutoLayoutAll.title': '03 Auto Layout + Cleanup',
+        'sub.geAutoLayoutAll.desc': '<ul><li>Convert Relation/Wrap Frames to Auto Layout (only when <code>layoutMode=NONE</code>)</li><li>Apply “new rules” Auto Layout across subtree</li><li>Cleanup: ungroup redundant managed Frames while keeping position</li><li>Skip helper Frames inside Instances</li></ul>',
+        'sub.geConvertToAutoLayout.title': '04 Convert To Auto Layout',
+        'sub.geConvertToAutoLayout.desc': '<ul><li>Convert Relation Frames to Auto Layout (Row/Column)</li><li>Convert Wrap Frames using stored wrap axis</li><li>Only converts Frames with <code>layoutMode=NONE</code></li><li>Skip Frames inside Instances</li></ul>',
+        'sub.geConvertGroups.title': '05 Convert Groups',
+        'sub.geConvertGroups.desc': '<ul><li>Convert <code>GROUP</code> to <code>FRAME</code> in subtree</li><li>Preserve corner radius when possible</li><li>Skip Groups inside Instances</li></ul>',
+        'sub.geApplyCleanup.title': '06 Apply & Cleanup',
+        'sub.geApplyCleanup.desc': '<ul><li>Apply “new rules” Auto Layout across subtree</li><li>Cleanup: ungroup redundant managed Frames while keeping position</li></ul>',
+        'sub.geConvertContainer.title': '07 Convert Containers',
+        'sub.geConvertContainer.desc': '<ul><li>If a container Frame has fill or stroke, convert it to Auto Layout too</li><li>Choose the configuration that moves children the least</li><li>Only converts Frames with <code>layoutMode=NONE</code></li><li>Skip Frames inside Instances</li></ul>',
+        'sub.geAddStroke.title': '08 Add Stroke',
+        'sub.geAddStroke.desc': '<ul><li>Add stroke to generated Relation/Wrap Frames for inspection</li><li>Toggleable switch (does not change layout logic)</li></ul>',
+        'user.hero.empty': 'Select',
+        'user.hero.step1': 'Clean',
+        'user.hero.step2': 'Optimize'
+      },
+      zh: {
+        'app.title': 'Fresh Start',
+        'app.tagline': '清理与整理图层，更快更稳',
+        'mode.user': '用户模式',
+        'mode.dev': 'Dev 模式',
+        'user.top.title': '你的设计\n从这里全新开始',
+        'user.top.subtitle': '清理、优化、准备就绪',
+        'user.step.none.title': '请先选择一个 Frame',
+        'user.step.none.desc': '你可以按步骤执行\n也可以单独使用下方功能',
+        'user.step.1.title': '第一步：清理设计稿',
+        'user.step.1.desc': '清除不可见元素 + 智能重命名\n可适用于整页',
+        'user.step.2.title': '第二步：优化设计稿',
+        'user.step.2.desc': '优化结构层级 + 添加自动布局\n建议针对单个模块使用',
+        'user.feature.removeInvisible.desc': '如隐藏的、重叠的\n透明度为0的元素',
+        'user.feature.removeInvisible.action': '清除',
+        'user.feature.smartRename.desc': '根据元素类型智能\n重命名所有图层',
+        'user.feature.smartRename.action': '重命名',
+        'user.feature.optimizeStructure.desc': '尽可能减少图层层级\n便于添加自动布局',
+        'user.feature.optimizeStructure.action': '优化',
+        'user.feature.autoLayout.desc': '添加相对合理的\n自动布局',
+        'user.feature.autoLayout.action': '添加',
+        'user.hero.title': 'Fresh Start',
+        'user.hero.desc': '面向日常使用的更清晰 UI：更少选项、更安全的默认流程。',
+        'user.lead.title': '从这里开始',
+        'user.lead.desc': '更清晰的日常界面：更少选项，更安全的默认流程。',
+        'user.section.integrated.title': '整合新功能',
+        'user.section.integrated.desc': '比单模块更高层的组合流程，一键完成两步。',
+        'user.section.core.title': '四大核心功能',
+        'user.section.core.desc': '只需要单个动作时，可直接运行对应模块。',
+        'user.combo1.badge': '新功能 01',
+        'user.combo1.title': '清理 + 重命名',
+        'user.combo1.desc': '整合“清除不可见元素 / 重叠图片清理”与“智能重命名”，先清理再统一命名。',
+        'user.combo2.badge': '新功能 02',
+        'user.combo2.title': '结构优化 + 自动布局',
+        'user.combo2.desc': '先优化层级与结构，再添加 Auto Layout 并清理辅助层。',
+        'common.run': '执行',
+        'tab.removeInvisible': '清除不可见元素',
+        'tab.smartRename': '智能重命名',
+        'tab.optimizeStructure': '优化结构层级',
+        'tab.autoLayout': '添加自动布局',
+        'module.removeInvisible.title': '清除不可见元素',
+        'module.removeInvisible.desc': '清理隐藏图层、0% 透明元素与容器区域外元素，提升文件可维护性。',
+        'module.smartRename.title': '智能重命名',
+        'module.smartRename.desc': '按内容、类型与上下文为图层生成更可读的名称。',
+        'module.optimizeStructure.title': '优化结构层级',
+        'module.optimizeStructure.desc': '优化层级：去除冗余嵌套，统一 Group 为 Frame，尽量保持布局不变。',
+        'module.autoLayout.title': '添加自动布局',
+        'module.autoLayout.desc': '添加自动布局：识别行/列结构，转为 Auto Layout，并清理辅助层。',
+        'sub.removeHidden.title': '01 清除不可见元素',
+        'sub.removeHidden.desc': '<ul><li>删除 <code>visible=false</code> 的图层</li><li>删除 <code>opacity=0</code> 的图层</li><li>递归处理所选 Frame/Group 子树</li></ul>',
+        'sub.removeOutsideContainer.title': '02 清除容器区域外元素',
+        'sub.removeOutsideContainer.desc': '<ul><li>若子元素与容器边界完全不相交，则删除该子元素</li><li>跳过 locked 图层</li><li>跳过 Instance 及其内部图层</li></ul>',
+        'sub.removeOverlapImages.title': '03 清理重叠图片',
+        'sub.removeOverlapImages.desc': '<ul><li>识别 fill 中含可见 <code>IMAGE</code> 的图层</li><li>当容器内存在 2+ 张重叠图片，且最上层图片覆盖容器时：仅保留最上层</li><li>删除与最上层图片重叠的其他图片</li><li>跳过 locked 图层与 Instance</li></ul>',
+        'sub.smartRename.title': '01 智能重命名',
+        'sub.smartRename.desc': '<ul><li>按图层类型/内容生成更可读的名称</li><li>Frame：若有 Auto Layout 则命名为 <code>Row/Column</code>，否则结合子元素推断</li><li>跳过 Instance（不改实例内部）</li><li>递归处理 Frame/Group 子树</li></ul>',
+        'sub.flattenRemoveAutoLayout.title': '01 移除 Auto Layout',
+        'sub.flattenRemoveAutoLayout.desc': '<ul><li>对存在 Auto Layout 的 Frame：设置 <code>layoutMode=NONE</code></li><li>移除后会 resize 回原尺寸，避免尺寸变化</li><li>递归处理 Frame/Group 子树</li></ul>',
+        'sub.flattenConvertGroups.title': '02 Group 转 Frame',
+        'sub.flattenConvertGroups.desc': '<ul><li>将 <code>GROUP</code> 替换为同尺寸 <code>FRAME</code></li><li>子图层按绝对坐标回填，尽量保持位置不变</li><li>尽量保留圆角</li><li>跳过 Instance 内部的 Group</li></ul>',
+        'sub.flattenApplyShapeStyle.title': '03 上移形状样式',
+        'sub.flattenApplyShapeStyle.desc': '<ul><li>寻找覆盖容器面积 &gt; 90% 的“非图片形状”</li><li>若该形状同时覆盖“所选容器”面积 &gt; 90%：将样式上移到所选容器 Frame</li><li>若该形状是 mask：删除 mask</li><li>否则：将 fills/strokes/effects/corner 等样式上移到目标 Frame</li><li>上移后删除该形状</li></ul>',
+        'sub.flattenDetectMajorColor.title': '04 检测主色',
+        'sub.flattenDetectMajorColor.label': '统计所选容器主色（按面积）：',
+        'sub.flattenOptimizeStructure.title': '05 优化结构层级',
+        'sub.flattenOptimizeStructure.desc': '<ul><li>展开层级并尽量保持绝对位置不变</li><li>不处理：Instance、含图片且尺寸 &lt;= 图片元素尺寸的 Frame、带 fill 的 Frame</li><li>按面积统计主色后：主色背景仅保留面积最大的一个</li></ul>',
+        'sub.geCreateRelations.title': '01 生成关系框',
+        'sub.geCreateRelations.desc': '<ul><li>按轴向重叠关系识别行/列（用连通性分组）</li><li>为每组生成 Relation Frame（Row/Column）</li><li>跳过 locked 或无效（宽高为 0）的图层</li><li>避免重复/嵌套生成相同关系框</li></ul>',
+        'sub.geNearestWrap.title': '02 最近包裹',
+        'sub.geNearestWrap.desc': '<ul><li>仅对 Relation Frame 生效（Row/Column）</li><li>计算最近间距（容差 0.01），并按连通性打包成组</li><li>为“最近的一组”创建 Wrap Frame</li><li>跳过 Instance 内部的关系框</li></ul>',
+        'sub.geAutoLayoutAll.title': '03 自动布局+清理',
+        'sub.geAutoLayoutAll.desc': '<ul><li>将 Relation/Wrap Frame 转为 Auto Layout（仅当 <code>layoutMode=NONE</code>）</li><li>在子树内应用“新规则”自动布局</li><li>清理：解散无用中间 Frame（保位置）</li><li>跳过 Instance 内部的辅助层</li></ul>',
+        'sub.geConvertToAutoLayout.title': '04 转 Auto Layout',
+        'sub.geConvertToAutoLayout.desc': '<ul><li>将 Relation Frame 转为 Auto Layout（Row/Column）</li><li>将 Wrap Frame 按记录的方向转为 Auto Layout</li><li>仅转换 <code>layoutMode=NONE</code> 的 Frame</li><li>跳过 Instance 内部的 Frame</li></ul>',
+        'sub.geConvertGroups.title': '05 Group 转 Frame',
+        'sub.geConvertGroups.desc': '<ul><li>将子树内的 <code>GROUP</code> 转为 <code>FRAME</code></li><li>尽量保留圆角</li><li>跳过 Instance 内部的 Group</li></ul>',
+        'sub.geApplyCleanup.title': '06 应用并清理',
+        'sub.geApplyCleanup.desc': '<ul><li>在子树内应用“新规则”自动布局</li><li>清理：解散无用中间 Frame（保位置）</li></ul>',
+        'sub.geConvertContainer.title': '07 容器转 Auto Layout',
+        'sub.geConvertContainer.desc': '<ul><li>若容器 Frame 有填充或描边，也将其转为 Auto Layout</li><li>转换时选择移动子元素最小的配置</li><li>仅转换 <code>layoutMode=NONE</code> 的 Frame</li><li>跳过 Instance 内部的 Frame</li></ul>',
+        'sub.geAddStroke.title': '08 添加描边',
+        'sub.geAddStroke.desc': '<ul><li>给新生成的 Relation/Wrap Frame 加描边，便于检查</li><li>可切换开关（不影响布局逻辑）</li></ul>',
+        'user.hero.empty': '选择',
+        'user.hero.step1': '清理',
+        'user.hero.step2': '优化'
+      }
+    };
+
+    const LANG_STORAGE_KEY = 'autofix:lang';
+    const MODE_STORAGE_KEY = 'autofix:mode';
+    let currentLang = 'zh';
+    let currentMode = 'user';
+
+    function normalizeLang(lang) {
+      return lang === 'zh' ? 'zh' : 'en';
+    }
+
+    function normalizeMode(mode) {
+      return mode === 'dev' ? 'dev' : 'user';
+    }
+
+    function getInitialLang() {
+      try {
+        const stored = localStorage.getItem(LANG_STORAGE_KEY);
+        if (stored) return normalizeLang(stored);
+      } catch (e) {
+      }
+      return 'zh';
+    }
+
+    function getInitialMode() {
+      try {
+        const stored = localStorage.getItem(MODE_STORAGE_KEY);
+        if (stored) return normalizeMode(stored);
+      } catch (e) {
+      }
+      return 'user';
+    }
+
+    function t(key, lang) {
+      const l = normalizeLang(lang);
+      return (I18N[l] && I18N[l][key]) || (I18N.en && I18N.en[key]) || '';
+    }
+
+    function applyLanguage(lang) {
+      const l = normalizeLang(lang);
+      currentLang = l;
+      document.documentElement.lang = l === 'zh' ? 'zh-CN' : 'en';
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (!key) return;
+        el.textContent = t(key, l);
+      });
+
+      document.querySelectorAll('[data-i18n-html]').forEach(el => {
+        const key = el.getAttribute('data-i18n-html');
+        if (!key) return;
+        el.innerHTML = t(key, l);
+      });
+
+      document.querySelectorAll('[data-lang-toggle]').forEach(toggleBtn => {
+        toggleBtn.textContent = l === 'zh' ? 'EN' : '中文';
+        toggleBtn.setAttribute('aria-label', l === 'zh' ? '切换语言' : 'Switch language');
+        toggleBtn.setAttribute('title', l === 'zh' ? '切换语言' : 'Switch language');
+      });
+
+      // Apply letter spacing for Chinese mode
+      const userModeEl = document.getElementById('user-mode');
+      if (userModeEl) {
+        const chineseTextSelectors = [
+          '.u-title',
+          '.u-subtitle',
+          '.u-step-title',
+          '.u-step-desc',
+          '.u-card-title',
+          '.u-card-desc',
+          '.u-link',
+          '.u-step-run',
+          '.u-card-btn'
+        ];
+        chineseTextSelectors.forEach(selector => {
+          userModeEl.querySelectorAll(selector).forEach(el => {
+            el.style.letterSpacing = l === 'zh' ? '0.05em' : '';
+          });
+        });
+
+        // Apply font weight for hero text in Chinese mode
+        const heroTextEl = userModeEl.querySelector('.u-step-hero-text');
+        if (heroTextEl) {
+          heroTextEl.style.fontWeight = l === 'zh' ? '900' : '';
+        }
+      }
+
+      try {
+        localStorage.setItem(LANG_STORAGE_KEY, l);
+      } catch (e) {
+      }
+
+      parent.postMessage({ pluginMessage: { type: 'set-language', lang: l } }, '*');
+
+      renderUserMode();
+    }
+
+    function applyMode(mode) {
+      const m = normalizeMode(mode);
+      currentMode = m;
+      const userEl = document.getElementById('user-mode');
+      const devEl = document.getElementById('dev-mode');
+      const userBtn = document.getElementById('mode-user');
+      const devBtn = document.getElementById('mode-dev');
+      const devHeader = document.getElementById('dev-header');
+
+      if (userEl) userEl.classList.toggle('active', m === 'user');
+      if (devEl) devEl.classList.toggle('active', m === 'dev');
+      if (userBtn) {
+        userBtn.classList.toggle('active', m === 'user');
+        userBtn.setAttribute('aria-selected', m === 'user' ? 'true' : 'false');
+      }
+      if (devBtn) {
+        devBtn.classList.toggle('active', m === 'dev');
+        devBtn.setAttribute('aria-selected', m === 'dev' ? 'true' : 'false');
+      }
+
+      if (devHeader) {
+        devHeader.style.display = m === 'dev' ? 'grid' : 'none';
+      }
+
+      // Toggle user mode background gradient
+      document.body.classList.toggle('user-mode-active', m === 'user');
+
+      try {
+        localStorage.setItem(MODE_STORAGE_KEY, m);
+      } catch (e) {
+      }
+
+      renderUserMode();
+    }
+
+    function getCurrentLang() {
+      return currentLang;
+    }
+
+    let userHasSelection = false;
+    let userStepIndex = 0;
+
+    const USER_MODE_ASSETS = {
+      empty: {
+        bgClass: 'bg-empty',
+        heroClass: 'hero-empty',
+        heroTextKey: 'user.hero.empty',
+        titleKey: 'user.step.none.title',
+        descKey: 'user.step.none.desc'
+      },
+      steps: [
+        {
+          bgClass: 'bg-step1',
+          heroClass: 'hero-step1',
+          heroTextKey: 'user.hero.step1',
+          titleKey: 'user.step.1.title',
+          descKey: 'user.step.1.desc',
+          comboId: 'combo-clean-rename'
+        },
+        {
+          bgClass: 'bg-step2',
+          heroClass: 'hero-step2',
+          heroTextKey: 'user.hero.step2',
+          titleKey: 'user.step.2.title',
+          descKey: 'user.step.2.desc',
+          comboId: 'combo-structure-autolayout'
+        }
+      ]
+    };
+
+    function setUserHasSelection(hasSelection) {
+      userHasSelection = !!hasSelection;
+      if (!userHasSelection) {
+        userStepIndex = 0;
+      }
+      renderUserMode();
+    }
+
+    function renderUserMode() {
+      const bgEl = document.getElementById('u-bg');
+      const cardEl = document.getElementById('u-step-card');
+      const heroImgEl = document.getElementById('u-step-hero-img');
+      const heroTextEl = document.getElementById('u-step-hero-text');
+      const titleEl = document.getElementById('u-step-title');
+      const descEl = document.getElementById('u-step-desc');
+      const runBtn = document.getElementById('u-step-run');
+      const dotsEl = document.getElementById('u-dots');
+      const dotButtons = dotsEl ? Array.from(dotsEl.querySelectorAll('.u-dot')) : [];
+
+      if (!bgEl || !cardEl || !heroImgEl || !titleEl || !descEl || !runBtn || !dotsEl) return;
+
+      // Clear previous bg classes
+      bgEl.className = 'u-bg';
+
+      if (!userHasSelection) {
+        const cfg = USER_MODE_ASSETS.empty;
+        bgEl.classList.add(cfg.bgClass);
+        heroImgEl.className = 'u-step-hero-img ' + cfg.heroClass;
+        if (heroTextEl) heroTextEl.textContent = t(cfg.heroTextKey, getCurrentLang());
+        titleEl.textContent = t(cfg.titleKey, getCurrentLang());
+        descEl.textContent = t(cfg.descKey, getCurrentLang());
+        runBtn.disabled = true;
+        dotsEl.style.display = 'none';
+        cardEl.dataset.state = 'empty';
+        dotButtons.forEach(btn => btn.removeAttribute('aria-current'));
+        return;
+      }
+
+      const idx = userStepIndex === 1 ? 1 : 0;
+      const cfg = USER_MODE_ASSETS.steps[idx];
+      bgEl.classList.add(cfg.bgClass);
+      heroImgEl.className = 'u-step-hero-img ' + cfg.heroClass;
+      if (heroTextEl) heroTextEl.textContent = t(cfg.heroTextKey, getCurrentLang());
+      titleEl.textContent = t(cfg.titleKey, getCurrentLang());
+      descEl.textContent = t(cfg.descKey, getCurrentLang());
+      runBtn.disabled = false;
+      dotsEl.style.display = 'flex';
+      cardEl.dataset.state = idx === 0 ? 'step1' : 'step2';
+
+      dotButtons.forEach(btn => {
+        const s = btn.getAttribute('data-step');
+        const isActive = s === String(idx);
+        if (isActive) btn.setAttribute('aria-current', 'true');
+        else btn.removeAttribute('aria-current');
+      });
+    }
+
+    // Tab switching
+    document.querySelectorAll('.tab-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        // Update active pill
+        document.querySelectorAll('.tab-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+
+        // Show corresponding content
+        const tabId = pill.getAttribute('data-tab');
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        const contentEl = document.getElementById(tabId);
+        if (contentEl) contentEl.classList.add('active');
+      });
+    });
+
+    function toggleSetting(element) {
+      element.classList.toggle('active');
+    }
+
+    function getGroupAddStrokeEnabled() {
+      const el = document.querySelector('#group-elements [data-setting="group-add-stroke"]');
+      if (!el) return true;
+      return el.classList.contains('active');
+    }
+
+    // Run entire module
+    function runModule(moduleId, options) {
+      const moduleSubOrder = {
+        'remove-invisible': ['remove-hidden', 'remove-outside-container', 'remove-overlap-images'],
+        'smart-rename': ['smart-rename'],
+        'flatten-structure': ['flatten-ra', 'flatten-cg', 'flatten-as', 'flatten-mc', 'flatten-ft'],
+        'group-elements': ['group-elements', 'group-elements-al']
+      };
+
+      const moduleCompletionMessages = {
+        'remove-invisible': 'module-remove-invisible-done',
+        'smart-rename': 'module-smart-rename-done',
+        'flatten-structure': 'module-flatten-structure-done',
+        'group-elements': 'module-group-elements-done'
+      };
+
+      const orderedSubs = moduleSubOrder[moduleId] || [];
+      if (moduleId === 'group-elements') {
+        const addStroke = options && typeof options.addStroke === 'boolean' ? options.addStroke : getGroupAddStrokeEnabled();
+        for (const sub of orderedSubs) {
+          parent.postMessage({ pluginMessage: { type: sub, addStroke, lang: getCurrentLang(), quiet: true } }, '*');
+        }
+        // Send completion notification
+        const completionType = moduleCompletionMessages[moduleId];
+        if (completionType) {
+          parent.postMessage({ pluginMessage: { type: completionType, lang: getCurrentLang() } }, '*');
+        }
+        return;
+      }
+
+      for (const sub of orderedSubs) {
+        parent.postMessage({ pluginMessage: { type: sub, lang: getCurrentLang(), quiet: true } }, '*');
+      }
+      // Send completion notification
+      const completionType = moduleCompletionMessages[moduleId];
+      if (completionType) {
+        parent.postMessage({ pluginMessage: { type: completionType, lang: getCurrentLang() } }, '*');
+      }
+    }
+
+    function runUserCombo(comboId) {
+      const plan = {
+        'combo-clean-rename': [
+          { type: 'remove-hidden' },
+          { type: 'remove-outside-container' },
+          { type: 'remove-overlap-images' },
+          { type: 'smart-rename' }
+        ],
+        'combo-structure-autolayout': [
+          { type: 'flatten-ra' },
+          { type: 'flatten-cg' },
+          { type: 'flatten-as' },
+          { type: 'flatten-mc' },
+          { type: 'flatten-ft' },
+          { type: 'group-elements', addStroke: false },
+          { type: 'group-elements-al', addStroke: false }
+        ]
+      };
+
+      const steps = plan[comboId] || [];
+      for (const step of steps) {
+        const payload = { type: step.type, lang: getCurrentLang(), quiet: true };
+        if (typeof step.addStroke === 'boolean') payload.addStroke = step.addStroke;
+        parent.postMessage({ pluginMessage: payload }, '*');
+      }
+
+      // Send completion notification based on combo type
+      const completionType = comboId === 'combo-clean-rename' ? 'combo-step1-done' : 'combo-step2-done';
+      parent.postMessage({ pluginMessage: { type: completionType, lang: getCurrentLang() } }, '*');
+
+      // Auto switch to step 2 after step 1 execution
+      if (comboId === 'combo-clean-rename' && userStepIndex === 0) {
+        userStepIndex = 1;
+        renderUserMode();
+      }
+    }
+
+    // Run individual sub-function
+    function runSubFunction(subId) {
+      const groupStepTypes = new Set(['group-elements', 'group-elements-al', 'ge-rel', 'ge-wrap', 'ge-al-convert', 'ge-al-cg', 'ge-al-apply-clean']);
+      if (groupStepTypes.has(subId)) {
+        const addStroke = getGroupAddStrokeEnabled();
+        parent.postMessage({ pluginMessage: { type: subId, addStroke, lang: getCurrentLang() } }, '*');
+        return;
+      }
+
+      parent.postMessage({ pluginMessage: { type: subId, lang: getCurrentLang() } }, '*');
+    }
+
+    const initialLang = getInitialLang();
+    applyLanguage(initialLang);
+    const initialMode = getInitialMode();
+    applyMode(initialMode);
+
+    const userModeBtn = document.getElementById('mode-user');
+    const devModeBtn = document.getElementById('mode-dev');
+    if (userModeBtn) {
+      userModeBtn.addEventListener('click', () => applyMode('user'));
+    }
+    if (devModeBtn) {
+      devModeBtn.addEventListener('click', () => applyMode('dev'));
+    }
+    document.querySelectorAll('[data-lang-toggle]').forEach(langBtn => {
+      langBtn.addEventListener('click', () => {
+        applyLanguage(getCurrentLang() === 'zh' ? 'en' : 'zh');
+      });
+    });
+
+    const userDevLink = document.getElementById('u-dev-link');
+    if (userDevLink) {
+      userDevLink.addEventListener('click', () => applyMode('dev'));
+    }
+
+    // Dev mode trigger: click 5 times on top-right corner
+    (function setupDevTrigger() {
+      const trigger = document.getElementById('dev-trigger');
+      if (!trigger) return;
+      let clickCount = 0;
+      let lastClickTime = 0;
+      const CLICK_INTERVAL = 500; // ms
+      const TARGET_CLICKS = 5;
+
+      trigger.addEventListener('click', () => {
+        const now = Date.now();
+        if (now - lastClickTime > CLICK_INTERVAL) {
+          clickCount = 0;
+        }
+        clickCount++;
+        lastClickTime = now;
+
+        if (clickCount >= TARGET_CLICKS) {
+          clickCount = 0;
+          applyMode('dev');
+        }
+      });
+    })();
+
+    const userRunBtn = document.getElementById('u-step-run');
+    if (userRunBtn) {
+      userRunBtn.addEventListener('click', () => {
+        if (!userHasSelection) return;
+        const cfg = USER_MODE_ASSETS.steps[userStepIndex === 1 ? 1 : 0];
+        runUserCombo(cfg.comboId);
+      });
+    }
+
+    const dotsEl = document.getElementById('u-dots');
+    if (dotsEl) {
+      dotsEl.querySelectorAll('.u-dot').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const next = btn.getAttribute('data-step');
+          userStepIndex = next === '1' ? 1 : 0;
+          renderUserMode();
+        });
+      });
+    }
+
+    window.onmessage = (event) => {
+      const msg = event && event.data && event.data.pluginMessage;
+      if (!msg || typeof msg.type !== 'string') return;
+
+      if (msg.type === 'selection-state') {
+        setUserHasSelection(!!msg.hasSelection);
+        return;
+      }
+
+      if (msg.type !== 'flatten-major-color') return;
+      const textEl = document.getElementById('flatten-major-color-text');
+      const swatchEl = document.getElementById('flatten-major-color-swatch');
+      if (!textEl || !swatchEl) return;
+      const c = msg.color;
+      if (!c) {
+        textEl.textContent = '—';
+        swatchEl.style.backgroundColor = 'transparent';
+        return;
+      }
+      const r = Math.round((c.r || 0) * 255);
+      const g = Math.round((c.g || 0) * 255);
+      const b = Math.round((c.b || 0) * 255);
+      const a = typeof c.a === 'number' ? c.a : 1;
+      textEl.textContent = `rgba(${r}, ${g}, ${b}, ${a.toFixed(2)})`;
+      swatchEl.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${a})`;
+    };
+
+    // Mouse tracking for wave animation
+    (function initMouseTracking() {
+      const stepCard = document.getElementById('u-step-card');
+      const wavesEl = document.getElementById('u-step-hero-waves');
+      if (!stepCard || !wavesEl) return;
+
+      let targetX = 0, targetY = 0;
+      let currentX = 0, currentY = 0;
+      const maxOffset = 30;
+      const inertiaSteps = [1, 0.8, 0.6, 0.4, 0.2, 0, -0.2, -0.4];
+      let isMouseInWindow = true;
+
+      document.addEventListener('mousemove', (e) => {
+        const rect = stepCard.getBoundingClientRect();
+        const cardCenterX = rect.left + rect.width / 2;
+        const cardCenterY = rect.top + rect.height / 2;
+        
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        
+        const percentX = (e.clientX - cardCenterX) / (windowWidth / 2);
+        const percentY = (e.clientY - cardCenterY) / (windowHeight / 2);
+        
+        targetX = Math.max(-1, Math.min(1, percentX)) * maxOffset;
+        targetY = Math.max(-1, Math.min(1, percentY)) * maxOffset;
+      });
+
+      document.addEventListener('mouseenter', () => {
+        isMouseInWindow = true;
+      });
+
+      document.addEventListener('mouseleave', () => {
+        isMouseInWindow = false;
+        targetX = 0;
+        targetY = 0;
+      });
+
+      function animate() {
+        currentX += (targetX - currentX) * 0.1;
+        currentY += (targetY - currentY) * 0.1;
+
+        const positions = inertiaSteps.map((factor) => {
+          const offsetX = currentX * factor;
+          const offsetY = currentY * factor;
+          return `${offsetX}px ${offsetY}px`;
+        });
+        wavesEl.style.backgroundPosition = positions.join(', ');
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    })();
+  </script>
+</body>
+</html>
