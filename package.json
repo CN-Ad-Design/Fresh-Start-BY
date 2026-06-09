@@ -1,0 +1,17 @@
+{
+  "name": "figma_plugin_autofix",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -w"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.125.0",
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Fresh Start",
+  "id": "1639609214562788106",
+  "documentAccess": "dynamic-page",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": [
+    "figma"
+  ],
+  "networkAccess": {
+    "allowedDomains": [
+      "none"
+    ]
+  }
+}
